@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback, Suspense, lazy } from "react";
-import Sidebar from "./components/Sidebar";
-import Onboarding from "./components/Onboarding";
-import BudgetSummary from "./components/BudgetSummary";
+const Sidebar = lazy(() => import("./components/Sidebar"));
+const Onboarding = lazy(() => import("./components/Onboarding"));
+const BudgetSummary = lazy(() => import("./components/BudgetSummary"));
 
 const Preparation = lazy(() => import("./components/Preparation"));
 const Vendors = lazy(() => import("./components/Vendors"));
@@ -380,7 +380,7 @@ export default function App() {
   if (!authReady) {
     return (
       <div className="min-h-screen bg-surface-base flex flex-col items-center justify-center space-y-3" id="app-loading">
-        <img src="/logo.webp" alt="Zawwaja" className="w-16 h-16 object-contain animate-pulse mb-1" />
+        <img src="/logo.webp" alt="Zawwaja" className="w-16 h-16 object-contain animate-pulse mb-1" width="64" height="64" loading="eager" fetchpriority="high" />
         <h3 className="font-serif font-bold text-text-primary text-md">Bismillah, Zawwaja Memuat...</h3>
         <p className="text-xs text-text-tertiary">Menyisir konfigurasi Syari'at & Database Islami</p>
       </div>
@@ -394,13 +394,15 @@ export default function App() {
   // Show onboarding if they aren't authenticated or aren't approved yet (unless they're an admin, who can log straight into the workspace)
   if (!user || (!profile && user.uid !== "TCJDTGcaTZRcBo9jC1JZBOAnWgo2") || (!isApproved && !isAdminUser)) {
     return (
-      <Onboarding 
-        onSuccess={handleOnboardingSuccess} 
-        onLogout={handleLogout}
-        profile={profile}
-        userId={user?.uid || null}
-        setUser={setUser}
-      />
+      <Suspense fallback={<div className="min-h-screen bg-surface-base flex items-center justify-center"><div className="w-8 h-8 border-4 border-brand-200 border-t-brand-600 rounded-full animate-spin"></div></div>}>
+        <Onboarding 
+          onSuccess={handleOnboardingSuccess} 
+          onLogout={handleLogout}
+          profile={profile}
+          userId={user?.uid || null}
+          setUser={setUser}
+        />
+      </Suspense>
     );
   }
 
@@ -412,13 +414,15 @@ export default function App() {
     <div className="flex h-screen antigravity-bg font-sans text-text-primary" id="main-workspace">
       
       {/* 1. Left Sidebar Navigation */}
-      <Sidebar 
-        currentTab={currentTab} 
-        setCurrentTab={setCurrentTab} 
-        profile={profile}
-        onLogout={handleLogout}
-        onOpenSettings={() => setCurrentTab("profile")}
-      />
+      <Suspense fallback={<div className="w-16 md:w-64 h-full bg-surface-raised border-r border-surface-border animate-pulse"></div>}>
+        <Sidebar 
+          currentTab={currentTab} 
+          setCurrentTab={setCurrentTab} 
+          profile={profile}
+          onLogout={handleLogout}
+          onOpenSettings={() => setCurrentTab("profile")}
+        />
+      </Suspense>
 
       {/* 2. Main Work Panel Area */}
       <div className="flex-1 flex flex-col overflow-hidden relative z-[1]">
