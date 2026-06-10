@@ -335,45 +335,95 @@ function BudgetSummary({
       {/* 1. PROFILE HEADER — TikTok-style (mobile)   */}
       {/* ============================================ */}
       <div className="animate-fade-up">
-        {/* Mobile: TikTok-style centered profile header */}
-        <div className="md:hidden flex flex-col items-center text-center relative pb-2">
-          {/* Avatar with edit button */}
-          <div className="relative mb-3">
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-brand-100 to-brand-200 text-brand-700 flex items-center justify-center font-bold text-2xl border-[3px] border-white shadow-lg shadow-brand-600/10">
-              {getInitials(profile.fullName)}
+        {/* Mobile: TikTok-style 30/70 profile dashboard */}
+        <div className="md:hidden flex flex-col items-center text-center relative">
+          
+          {/* ─── ZONE 1: Context & Status (Top 30%) ─── */}
+          {/* Avatar + Name + 3 Big Stats */}
+          <div className="w-full pb-4">
+            {/* Avatar Row with Edit */}
+            <div className="flex items-center justify-center gap-4 mb-2">
+              <div className="relative">
+                <div className="w-[72px] h-[72px] rounded-full bg-gradient-to-br from-brand-100 via-brand-50 to-brand-200 text-brand-700 flex items-center justify-center font-bold text-2xl border-[3px] border-white shadow-lg shadow-brand-600/10">
+                  {getInitials(profile.fullName)}
+                </div>
+                {/* Edit button — Fitts's Law: 44px touch target */}
+                <button
+                  onClick={onOpenSettings}
+                  className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-brand-600 text-white flex items-center justify-center shadow-md border-2 border-white hover:bg-brand-700 transition-colors cursor-pointer active:scale-90"
+                  title="Edit Profil"
+                  id="profile-edit-btn"
+                >
+                  <Pencil size={12} />
+                </button>
+              </div>
+              <div className="text-left">
+                <h1 className="text-[20px] font-serif font-bold text-text-primary leading-tight tracking-tight">
+                  {profile.fullName || "Pengantin"}
+                </h1>
+                <p className="text-[13px] text-text-secondary mt-0.5">
+                  & {profile.partnerName || "Pasangan"} <span className="text-brand-500">♡</span>
+                </p>
+                <p className="text-[10px] text-text-tertiary mt-0.5">
+                  {profile.weddingDate 
+                    ? new Date(profile.weddingDate).toLocaleDateString("id-ID", { day: 'numeric', month: 'long', year: 'numeric' })
+                    : "Tanggal belum ditentukan"}
+                </p>
+              </div>
             </div>
-            {/* Edit button overlay — like TikTok's edit profile icon */}
+
+            {/* 3 Big Stats Row — Like TikTok's Followers/Following/Likes */}
+            <div className="flex items-stretch justify-center gap-0 mt-3 mx-1">
+              {/* Stat: Countdown */}
+              <div className="flex-1 flex flex-col items-center py-2.5 border-r border-surface-border/50">
+                <span className="text-[24px] font-display font-extrabold text-brand-600 leading-none tracking-tight">
+                  {daysRemaining}
+                </span>
+                <span className="text-[10px] text-text-tertiary font-semibold mt-1 uppercase tracking-wider">Hari Lagi</span>
+              </div>
+              {/* Stat: Budget Used */}
+              <div className="flex-1 flex flex-col items-center py-2.5 border-r border-surface-border/50">
+                <span className={`text-[22px] font-display font-extrabold leading-none tracking-tight ${isBudgetSafe ? 'text-text-primary' : 'text-rose-600'}`}>
+                  {totalActualSpent >= 1000000 
+                    ? `${(totalActualSpent / 1000000).toFixed(1)}jt`
+                    : totalActualSpent >= 1000 
+                      ? `${(totalActualSpent / 1000).toFixed(0)}rb`
+                      : totalActualSpent
+                  }
+                </span>
+                <span className="text-[10px] text-text-tertiary font-semibold mt-1 uppercase tracking-wider">Terpakai</span>
+              </div>
+              {/* Stat: Progress % */}
+              <div className="flex-1 flex flex-col items-center py-2.5">
+                <span className="text-[24px] font-display font-extrabold text-brand-600 leading-none tracking-tight">
+                  {checklistPercentage}<span className="text-[14px]">%</span>
+                </span>
+                <span className="text-[10px] text-text-tertiary font-semibold mt-1 uppercase tracking-wider">Selesai</span>
+              </div>
+            </div>
+          </div>
+
+          {/* ─── ZONE 2: Control Center (Quick Actions) ─── */}
+          {/* Horizontal action buttons — 44px min touch target */}
+          <div className="w-full flex gap-2 px-1 pb-3">
             <button
-              onClick={onOpenSettings}
-              className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-brand-600 text-white flex items-center justify-center shadow-md border-2 border-white hover:bg-brand-700 transition-colors cursor-pointer active:scale-90"
-              title="Edit Profil"
-              id="profile-edit-btn"
+              onClick={() => onNavigate("checklist")}
+              className="flex-1 py-2.5 bg-brand-600 text-white font-bold text-[11px] rounded-lg flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-transform cursor-pointer"
             >
-              <Pencil size={13} />
+              Fase {activePhaseId} ↗
             </button>
-          </div>
-
-          {/* Name & Partner */}
-          <h1 className="text-lg font-serif font-bold text-text-primary leading-tight">
-            {profile.fullName || "Pengantin"}
-          </h1>
-          <p className="text-sm text-text-secondary mt-0.5">
-            <span className="text-brand-600">❤</span> {profile.partnerName || "Pasangan"}
-          </p>
-
-          {/* Countdown pill below name */}
-          <div className="mt-3 bg-gradient-to-r from-brand-600 to-brand-700 text-white px-5 py-2 rounded-full shadow-md shadow-brand-800/20 flex items-center gap-2">
-            <Calendar size={14} className="text-brand-200" />
-            <span className="text-sm font-bold">{daysRemaining}</span>
-            <span className="text-xs text-brand-200 font-medium">Hari Menuju Akad</span>
-          </div>
-
-          {/* Email / Role badge */}
-          <div className="mt-2 flex items-center gap-2">
-            <span className="text-[10px] text-text-tertiary">{profile.email}</span>
-            <span className="text-[9px] bg-brand-50 text-brand-600 font-bold uppercase px-2 py-0.5 rounded-full border border-brand-100">
-              {profile.role === "admin" ? "Admin" : "Pasangan Akad"}
-            </span>
+            <button
+              onClick={() => setShowVaccineModal(true)}
+              className="flex-1 py-2.5 bg-surface-raised border border-surface-border text-text-primary font-semibold text-[11px] rounded-lg flex items-center justify-center gap-1 active:scale-95 transition-transform cursor-pointer"
+            >
+              <Syringe size={13} /> Vaksin
+            </button>
+            <button
+              onClick={() => setShowKuaModal(true)}
+              className="flex-1 py-2.5 bg-surface-raised border border-surface-border text-text-primary font-semibold text-[11px] rounded-lg flex items-center justify-center gap-1 active:scale-95 transition-transform cursor-pointer"
+            >
+              <Info size={13} /> KUA
+            </button>
           </div>
         </div>
 
@@ -621,32 +671,6 @@ function BudgetSummary({
         </div>
       </div>
 
-      {/* Mobile: compact progress + budget row */}
-      <div className="md:hidden grid grid-cols-2 gap-3 animate-fade-up" style={{ animationDelay: '0.2s' }}>
-        <div className="glass-panel p-3 flex flex-col justify-between">
-          <span className="text-[8px] font-bold uppercase tracking-wider text-text-tertiary">Progres</span>
-          <div className="flex items-center gap-2 mt-2">
-            <ProgressRing percent={checklistPercentage} size={38} strokeWidth={3} />
-            <div>
-              <span className="text-lg font-display font-bold text-text-primary leading-none">{checklistPercentage}<span className="text-xs">%</span></span>
-              <p className="text-[8px] text-text-tertiary">{completedChecklistCount}/{totalChecklistCount}</p>
-            </div>
-          </div>
-        </div>
-        <div className="glass-panel p-3 flex flex-col justify-between">
-          <span className="text-[8px] font-bold uppercase tracking-wider text-text-tertiary">Anggaran</span>
-          <div className="mt-2">
-            <span className="text-sm font-display font-bold text-text-primary leading-none">{formatIDR(totalActualSpent)}</span>
-          </div>
-          <div className="flex items-center gap-1 mt-1.5">
-            <div className={`w-1.5 h-1.5 rounded-full ${isBudgetSafe ? 'bg-emerald-500' : 'bg-rose-500'}`} />
-            <span className={`text-[9px] font-bold ${isBudgetSafe ? 'text-emerald-600' : 'text-rose-600'}`}>
-              {isBudgetSafe ? 'Aman' : 'Overbudget!'}
-            </span>
-          </div>
-        </div>
-      </div>
-
 
 
       {/* ============================================ */}
@@ -756,8 +780,8 @@ function BudgetSummary({
         </div>
       </div>
 
-      {/* CTA Buttons */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 animate-fade-up" style={{ animationDelay: '0.4s' }}>
+      {/* CTA Buttons — desktop only (mobile has Zone 2 quick actions) */}
+      <div className="hidden md:grid md:grid-cols-3 gap-3 animate-fade-up" style={{ animationDelay: '0.4s' }}>
         <button
           onClick={() => onNavigate("checklist")}
           className="py-3 px-4 bg-brand-600 hover:bg-brand-500 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 shadow-lg transition-all cursor-pointer hover:shadow-xl hover:-translate-y-0.5"
