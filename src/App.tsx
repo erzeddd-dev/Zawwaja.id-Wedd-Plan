@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback, Suspense, lazy } from "react";
-const Sidebar = lazy(() => import("./components/Sidebar"));
+import Sidebar from "./components/Sidebar";
 import Onboarding from "./components/Onboarding";
-const BudgetSummary = lazy(() => import("./components/BudgetSummary"));
+import BudgetSummary from "./components/BudgetSummary";
 
 const Preparation = lazy(() => import("./components/Preparation"));
 const Vendors = lazy(() => import("./components/Vendors"));
