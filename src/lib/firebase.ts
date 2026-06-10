@@ -39,7 +39,8 @@ if (!isMockMode) {
   try {
     app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
     db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
-    auth = getAuth(app);
+    // Auth is initialized lazily via ensureAuth() to avoid loading
+    // the 90KB Firebase Auth iframe during initial page load
 
     // Lazy-load storage only when needed
     import('firebase/storage').then(({ getStorage }) => {
@@ -61,6 +62,14 @@ if (!isMockMode) {
   } catch (error) {
     console.error("Firebase initialization failed, falling back to mock mode:", error);
   }
+}
+
+// Lazy auth initializer — delays loading the 90KB auth iframe until first use
+function ensureAuth() {
+  if (!auth && !isMockMode && app) {
+    auth = getAuth(app);
+  }
+  return auth;
 }
 
 export { db, auth, storage };
@@ -282,7 +291,8 @@ export function subscribeToAuth(callback: (user: any | null, profile: UserProfil
       window.removeEventListener("mock-auth-changed", checkState);
     };
   } else {
-    return onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
+    const authInstance = ensureAuth();
+    return onAuthStateChanged(authInstance, async (firebaseUser: FirebaseUser | null) => {
       if (firebaseUser) {
         // Fetch User profile from Firestore
         const docRef = doc(db, "users", firebaseUser.uid);
@@ -317,7 +327,7 @@ export async function logoutUser() {
     window.dispatchEvent(new Event("mock-auth-changed"));
     return true;
   } else {
-    await signOut(auth);
+    await signOut(ensureAuth());
     return true;
   }
 }
@@ -882,7 +892,7 @@ export async function loginWithEmail(email: string, password: string): Promise<a
     return fakeUser;
   } else {
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(ensureAuth(), email, password);
       return userCredential.user;
     } catch (error: any) {
       console.error("Firebase Login error:", error);
@@ -901,7 +911,7 @@ export async function resetUserPassword(email: string): Promise<void> {
     });
   } else {
     try {
-      await sendPasswordResetEmail(auth, email);
+      await sendPasswordResetEmail(ensureAuth(), email);
     } catch (error: any) {
       console.error("Firebase Password Reset Error:", error);
       throw new Error(error.message || "Gagal mengirim email reset kata sandi. Pastikan email Anda benar.");
@@ -929,7 +939,7 @@ export async function signUpWithEmail(email: string, password: string): Promise<
     return fakeUser;
   } else {
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const userCredential = await createUserWithEmailAndPassword(ensureAuth(), email, password);
       return userCredential.user;
     } catch (error: any) {
       console.error("Firebase Signup error:", error);
@@ -950,7 +960,7 @@ export async function signUpOrSignInWithGoogle(): Promise<any> {
     try {
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({ prompt: 'select_account' });
-      const userCredential = await signInWithPopup(auth, provider);
+      const userCredential = await signInWithPopup(ensureAuth(), provider);
       return userCredential.user;
     } catch (error: any) {
       console.error("Firebase Google Auth error:", error);
