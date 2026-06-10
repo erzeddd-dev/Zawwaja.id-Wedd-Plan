@@ -264,7 +264,7 @@ export default function Onboarding({ onSuccess, onLogout, profile, userId, setUs
             {/* Majestic Centered Brand Emblem (No Text Clutter) */}
             <div className="text-center mb-6 flex justify-center">
               <img 
-                src="/logo.png" 
+                src="/logo.webp" 
                 alt="Zawwaja Premium Emblem" 
                 className="w-24 h-24 object-contain filter drop-shadow-[0_4px_12px_rgba(175,118,97,0.15)] hover:scale-105 transition-all duration-300 cursor-pointer"
               />

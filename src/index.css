@@ -309,7 +309,7 @@
 
   /* Main workspace background */
   .antigravity-bg {
-    background-image: url('/bg-garden.png');
+    background-image: url('/bg-garden.webp');
     background-size: cover;
     background-position: center;
     background-attachment: fixed;

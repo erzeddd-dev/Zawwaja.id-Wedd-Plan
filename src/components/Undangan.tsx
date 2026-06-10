@@ -1200,7 +1200,7 @@ export default function Undangan({ profile }: UndanganProps) {
                 
                 <div className="mt-8 flex flex-col items-center">
                   {/* Calligraphy logo seal */}
-                  <img src="/logo.png" alt="Zawwaja logo" className="w-20 h-20 object-contain drop-shadow-md mb-4" />
+                  <img src="/logo.webp" alt="Zawwaja logo" className="w-20 h-20 object-contain drop-shadow-md mb-4" />
                   <span className="text-[9px] uppercase font-bold tracking-widest text-[#af7661]">Walimatul 'Ursy</span>
                   <h3 className="text-xl font-serif font-bold text-[#572309] mt-2">
                     {config.groomNickname} & {config.brideNickname}
@@ -1245,7 +1245,7 @@ export default function Undangan({ profile }: UndanganProps) {
                   {activePhoneSection === "home" && (
                     <div className="text-center space-y-5 animate-fade-in">
                       <div className="flex flex-col items-center">
-                        <img src="/logo.png" alt="Zawwaja Crest" className="w-16 h-16 object-contain drop-shadow-sm mb-3" />
+                        <img src="/logo.webp" alt="Zawwaja Crest" className="w-16 h-16 object-contain drop-shadow-sm mb-3" />
                         <span className="text-[8px] uppercase font-bold tracking-widest text-[#af7661]">Walimatul 'Ursy</span>
                         <h3 className="text-lg font-serif font-bold text-[#572309] mt-1">{config.groomNickname} & {config.brideNickname}</h3>
                       </div>

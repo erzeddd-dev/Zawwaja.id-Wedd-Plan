@@ -380,7 +380,7 @@ export default function App() {
   if (!authReady) {
     return (
       <div className="min-h-screen bg-surface-base flex flex-col items-center justify-center space-y-3" id="app-loading">
-        <img src="/logo.png" alt="Zawwaja" className="w-16 h-16 object-contain animate-pulse mb-1" />
+        <img src="/logo.webp" alt="Zawwaja" className="w-16 h-16 object-contain animate-pulse mb-1" />
         <h3 className="font-serif font-bold text-text-primary text-md">Bismillah, Zawwaja Memuat...</h3>
         <p className="text-xs text-text-tertiary">Menyisir konfigurasi Syari'at & Database Islami</p>
       </div>

@@ -144,7 +144,7 @@ export default memo(function Sidebar({
             {!isCollapsed ? (
               <>
                 <div className="flex items-center space-x-2.5 min-w-0">
-                  <img src="/logo.png" alt="Zawwaja" className="w-8 h-8 rounded-lg shadow-sm shrink-0 object-cover border border-white/30" />
+                  <img src="/logo.webp" alt="Zawwaja" className="w-8 h-8 rounded-lg shadow-sm shrink-0 object-cover border border-white/30" />
                   <div className="min-w-0">
                     <h1 className="text-text-primary font-bold font-serif tracking-wide text-xs truncate">Zawwaja</h1>
                     <p className="text-[8px] text-brand-600 uppercase tracking-wider font-semibold leading-none truncate">Sharia Planner</p>
@@ -164,7 +164,7 @@ export default memo(function Sidebar({
                 className="w-10 h-10 rounded-xl overflow-hidden hover:scale-105 hover:bg-white/20 active:scale-95 transition-all flex items-center justify-center border border-white/25 shadow-sm cursor-pointer bg-white/10"
                 title="Buka Sidebar"
               >
-                <img src="/logo.png" alt="Zawwaja" className="w-8 h-8 rounded-lg object-cover" />
+                <img src="/logo.webp" alt="Zawwaja" className="w-8 h-8 rounded-lg object-cover" />
               </button>
             )}
           </div>
