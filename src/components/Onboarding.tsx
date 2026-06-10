@@ -267,6 +267,7 @@ export default function Onboarding({ onSuccess, onLogout, profile, userId, setUs
                 src="/logo.webp" 
                 alt="Zawwaja Premium Emblem" 
                 className="w-24 h-24 object-contain filter drop-shadow-[0_4px_12px_rgba(175,118,97,0.15)] hover:scale-105 transition-all duration-300 cursor-pointer"
+                width="96" height="96" fetchpriority="high" loading="eager"
               />
             </div>
 
