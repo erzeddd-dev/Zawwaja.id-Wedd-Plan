@@ -59,6 +59,33 @@ export default function App() {
     localStorage.setItem("zawwaja_current_tab", currentTab);
   }, [currentTab]);
 
+  useEffect(() => {
+    if (!window.history.state || !window.history.state.tab) {
+      const initialTab = localStorage.getItem("zawwaja_current_tab") || "dashboard";
+      window.history.replaceState({ tab: initialTab }, '', `#${initialTab}`);
+    }
+
+    const handlePopState = (e: PopStateEvent) => {
+      if (e.state && e.state.tab) {
+        setCurrentTab(e.state.tab);
+      } else {
+        setCurrentTab("dashboard");
+      }
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
+
+  const handleTabChange = useCallback((tab: string) => {
+    setCurrentTab(prev => {
+      if (prev !== tab) {
+        window.history.pushState({ tab }, '', `#${tab}`);
+      }
+      return tab;
+    });
+  }, []);
+
   // Core Document Database Collections
   const [checklistItems, setChecklistItems] = useState<WeddingChecklistItem[]>(defaultChecklistItems);
   const [vendors, setVendors] = useState<VendorItem[]>([]);
@@ -126,7 +153,7 @@ export default function App() {
     await logoutUser();
     setUser(null);
     setProfile(null);
-    setCurrentTab("dashboard");
+    handleTabChange("dashboard");
   };
 
   const getInitials = (name?: string) => {
@@ -140,7 +167,7 @@ export default function App() {
 
   const handleOnboardingSuccess = (newProfile: UserProfile) => {
     setProfile(newProfile);
-    setCurrentTab("dashboard");
+    handleTabChange("dashboard");
   };
 
   const handleSaveProfileFromDashboardOnboard = async (fullName: string, partnerName: string, weddingDate: string, totalBudget: number) => {
@@ -414,10 +441,10 @@ export default function App() {
       {/* 1. Left Sidebar Navigation */}
       <Sidebar 
         currentTab={currentTab} 
-        setCurrentTab={setCurrentTab} 
+        setCurrentTab={handleTabChange} 
         profile={profile}
         onLogout={handleLogout}
-        onOpenSettings={() => setCurrentTab("profile")}
+        onOpenSettings={() => handleTabChange("profile")}
       />
 
       {/* 2. Main Work Panel Area */}
@@ -427,16 +454,18 @@ export default function App() {
         {/* Outer scrolling content block with bottom padding to fit bottom bar on mobile */}
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8 pb-24 md:pb-8">
           <div className="max-w-6xl mx-auto pb-12">
+            
             {/* Render Views depending on state */}
             {currentTab === "dashboard" && (
               <BudgetSummary
                 profile={profile}
                 checklistItems={checklistItems}
                 maharItems={maharItems}
-                onNavigate={(tab) => setCurrentTab(tab)}
+                onNavigate={(tab) => handleTabChange(tab)}
                 onSaveProfile={handleSaveProfileFromDashboardOnboard}
                 onSaveChecklistItem={handleSaveChecklistItem}
-                onOpenSettings={() => setCurrentTab("profile")}
+                onOpenSettings={() => handleTabChange("profile")}
+                onLogout={handleLogout}
               />
             )}
 

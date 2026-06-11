@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { UserProfile, WeddingChecklistItem, MaharItem } from "../types";
 import {
   Calendar,
@@ -21,7 +22,8 @@ import {
   TrendingUp,
   Users,
   Settings,
-  Pencil
+  Pencil,
+  LogOut
 } from "lucide-react";
 
 interface BudgetSummaryProps {
@@ -32,6 +34,7 @@ interface BudgetSummaryProps {
   onSaveProfile?: (fullName: string, partnerName: string, weddingDate: string, totalBudget: number) => Promise<void>;
   onSaveChecklistItem?: (item: WeddingChecklistItem) => Promise<void>;
   onOpenSettings?: () => void;
+  onLogout?: () => void;
 }
 
 // Timeline phase data structure with icons and navigation targets
@@ -93,7 +96,8 @@ function BudgetSummary({
   onNavigate,
   onSaveProfile,
   onSaveChecklistItem,
-  onOpenSettings
+  onOpenSettings,
+  onLogout
 }: BudgetSummaryProps) {
   // Helper to extract initials for profile avatar
   const getInitials = (name?: string) => {
@@ -121,11 +125,12 @@ function BudgetSummary({
   const [onboardTotalBudget, setOnboardTotalBudget] = useState(35000000);
   const [isSavingOnboard, setIsSavingOnboard] = useState(false);
   const [onboardError, setOnboardError] = useState("");
+  const [dismissedWelcome, setDismissedWelcome] = useState(false);
 
   // Tooltip state
   const [hoveredNode, setHoveredNode] = useState<number | null>(null);
 
-  const showWelcomeModal = !profile.fullName || !profile.partnerName || !profile.weddingDate;
+  const showWelcomeModal = (!profile.fullName || !profile.partnerName || !profile.weddingDate) && !dismissedWelcome;
 
   // Calculate current date and remaining days
   useEffect(() => {
@@ -433,15 +438,17 @@ function BudgetSummary({
         {/* Desktop: Original header layout (unchanged) */}
         <div className="hidden md:flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-text-tertiary mb-1">
+            <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-text-tertiary mb-1.5">
               <Calendar size={12} />
               <span>{currentDateFormatted}</span>
             </div>
-            <h1 className="text-xl md:text-3xl font-serif font-bold text-text-primary leading-tight" style={{ textShadow: '0 2px 8px rgba(42, 92, 77, 0.08)' }}>
-              Assalamu'alaikum, <span className="text-brand-600">{profile.fullName || "Pengantin"}</span>
+            <h1 className="text-xl md:text-4xl font-serif font-bold text-brand-600 leading-tight flex items-center gap-3" style={{ textShadow: '0 2px 8px rgba(42, 92, 77, 0.08)' }}>
+              <span>{profile.fullName || "Pengantin"}</span>
+              <span className="text-brand-400 italic font-medium text-3xl">&</span>
+              <span>{profile.partnerName || "Pasangan"}</span>
             </h1>
-            <p className="text-text-secondary text-sm md:text-base mt-1.5">
-              dalam <span className="font-bold text-brand-600">{daysRemaining} hari</span> lagi bersama <span className="font-semibold text-brand-600">{profile.partnerName || "Pasangan"}</span>
+            <p className="text-text-secondary text-sm md:text-base mt-2 font-medium">
+              Assalamu'alaikum, hari akad bahagia Anda berdua akan tiba dalam <span className="font-bold text-brand-600 text-lg mx-1">{daysRemaining} hari</span> lagi.
             </p>
           </div>
         </div>
@@ -807,6 +814,17 @@ function BudgetSummary({
         </button>
       </div>
 
+      {/* Logout Button Mobile Only */}
+      <div className="md:hidden pt-4 animate-fade-up" style={{ animationDelay: '0.45s' }}>
+        <button
+          onClick={onLogout}
+          className="w-full py-3 bg-rose-50 text-rose-600 font-bold rounded-xl border border-rose-200 hover:bg-rose-100 flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-sm"
+        >
+          <LogOut size={16} />
+          Keluar / Logout
+        </button>
+      </div>
+
       {/* ============================================ */}
       {/* VACCINATION SCHEDULE POPUP MODAL              */}
       {/* ============================================ */}
@@ -966,110 +984,139 @@ function BudgetSummary({
       {/* ============================================ */}
       {/* MANDATORY WELCOME MODAL SETUP                */}
       {/* ============================================ */}
-      {showWelcomeModal && (
-        <div className="fixed inset-0 bg-stone-950/80 backdrop-blur-lg flex items-center justify-center z-50 p-4 overflow-y-auto">
-          <div className="bg-surface-raised rounded-2xl border border-surface-border p-6 md:p-8 max-w-lg w-full shadow-2xl relative">
-            <div className="text-center mb-6">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold tracking-wider text-emerald-850 bg-emerald-50 border border-emerald-100 uppercase">
-                Bismillah, Selamat Datang di Zawwaja
-              </span>
-              <h2 className="text-2xl font-serif font-black text-text-primary mt-3">Lengkapi Profil Akad Pernikahan</h2>
-              <p className="text-text-secondary text-xs mt-1 leading-relaxed">
-                Silakan lengkapi informasi calon pengantin untuk mengonfigurasi jadwal, anggaran transparan, dan checklist syar'i Anda.
-              </p>
+      {showWelcomeModal && createPortal(
+        <div className="fixed inset-0 z-[9999] bg-stone-950/80 backdrop-blur-md flex items-center justify-center p-4 md:p-6 overflow-y-auto">
+          <div className="bg-surface-raised rounded-3xl border border-surface-border shadow-2xl w-full max-w-4xl relative overflow-hidden flex flex-col md:flex-row animate-in fade-in zoom-in-95 duration-500">
+            {/* Left Decorator Side (Hidden on Mobile) */}
+            <div className="hidden md:flex md:w-5/12 relative bg-brand-700 overflow-hidden text-white flex-col justify-between p-8">
+              <div className="absolute inset-0 opacity-20">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-white rounded-full mix-blend-overlay filter blur-3xl transform translate-x-1/3 -translate-y-1/3"></div>
+                <div className="absolute bottom-0 left-0 w-64 h-64 bg-emerald-300 rounded-full mix-blend-overlay filter blur-3xl transform -translate-x-1/3 translate-y-1/3"></div>
+              </div>
+              <div className="relative z-10">
+                <Compass className="w-12 h-12 mb-6 text-emerald-200" />
+                <h2 className="text-3xl font-serif font-bold mb-4 leading-tight">Mulai Perjalanan Istimewa Anda</h2>
+                <p className="text-emerald-100/80 text-sm leading-relaxed">
+                  Zawwaja akan menjadi asisten pribadi Anda untuk merencanakan akad impian secara syar'i, terstruktur, dan transparan.
+                </p>
+              </div>
+              <div className="relative z-10 text-xs font-medium text-emerald-200/60 uppercase tracking-widest">
+                Gerbang Persiapan Pernikahan
+              </div>
             </div>
 
-            {onboardError && (
-              <div className="mb-4 p-3 bg-rose-50 border border-rose-200 rounded-lg text-rose-700 text-xs flex items-center gap-2">
-                <AlertCircle size={16} />
-                <span>{onboardError}</span>
-              </div>
-            )}
-
-            <form onSubmit={handleOnboardSubmit} className="space-y-4">
-              <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-text-secondary mb-1">
-                  Calon Pengantin Pria
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Contoh: Rian Hardi"
-                  value={onboardFullName}
-                  onChange={(e) => setOnboardFullName(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-surface-sunken rounded-lg border border-surface-border focus:outline-none focus:ring-2 focus:ring-brand-600 font-sans text-sm text-text-primary placeholder-stone-400"
-                />
+            {/* Right Form Side */}
+            <div className="flex-1 p-6 md:p-10 flex flex-col justify-center bg-white">
+              <div className="text-center md:text-left mb-8">
+                <span className="md:hidden inline-flex items-center gap-1.5 px-3 py-1 mb-4 rounded-full text-[10px] font-bold tracking-wider text-emerald-850 bg-emerald-50 border border-emerald-100 uppercase">
+                  Bismillah, Selamat Datang
+                </span>
+                <h2 className="text-2xl md:text-3xl font-serif font-black text-text-primary">Profil Akad</h2>
+                <p className="text-text-secondary text-sm mt-2 leading-relaxed">
+                  Silakan lengkapi informasi Anda berdua untuk menyusun *timeline* dan memantau anggaran.
+                </p>
               </div>
 
-              <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-text-secondary mb-1">
-                  Calon Pengantin Wanita
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Contoh: Amira Syafira"
-                  value={onboardPartnerName}
-                  onChange={(e) => setOnboardPartnerName(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-surface-sunken rounded-lg border border-surface-border focus:outline-none focus:ring-2 focus:ring-brand-600 font-sans text-sm text-text-primary placeholder-stone-400"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-[10px] font-bold uppercase tracking-wider text-text-secondary mb-1">
-                    Rencana Tanggal Akad Nikah
-                  </label>
-                  <input
-                    type="date"
-                    required
-                    value={onboardWeddingDate}
-                    onChange={(e) => setOnboardWeddingDate(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-surface-sunken rounded-lg border border-surface-border focus:outline-none focus:ring-2 focus:ring-brand-600 font-mono text-xs text-text-primary"
-                  />
+              {onboardError && (
+                <div className="mb-6 p-3.5 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-xs flex items-center gap-2.5">
+                  <AlertCircle size={18} className="shrink-0" />
+                  <span className="font-medium">{onboardError}</span>
                 </div>
+              )}
 
-                <div>
-                  <label className="block text-[10px] font-bold uppercase tracking-wider text-text-secondary mb-1">
-                    Estimasi Anggaran (IDR)
-                  </label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-2.5 text-text-secondary text-sm font-semibold">Rp</span>
+              <form onSubmit={handleOnboardSubmit} className="space-y-5">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-1.5">
+                      Calon Pengantin Pria
+                    </label>
                     <input
                       type="text"
                       required
-                      value={onboardTotalBudget === 0 ? "" : new Intl.NumberFormat('id-ID').format(onboardTotalBudget)}
-                      onChange={(e) => {
-                        const val = e.target.value.replace(/[^0-9]/g, "");
-                        setOnboardTotalBudget(val === "" ? 0 : Number(val));
-                      }}
-                      className="w-full pl-9 pr-3 py-2.5 bg-surface-sunken rounded-lg border border-surface-border focus:outline-none focus:ring-2 focus:ring-brand-600 font-mono text-xs text-text-primary"
+                      placeholder="Contoh: Rian Hardi"
+                      value={onboardFullName}
+                      onChange={(e) => setOnboardFullName(e.target.value)}
+                      className="w-full px-4 py-3 bg-stone-50 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 font-sans text-sm text-stone-800 placeholder-stone-400 transition-all"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-1.5">
+                      Calon Pengantin Wanita
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Contoh: Amira Syafira"
+                      value={onboardPartnerName}
+                      onChange={(e) => setOnboardPartnerName(e.target.value)}
+                      className="w-full px-4 py-3 bg-stone-50 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 font-sans text-sm text-stone-800 placeholder-stone-400 transition-all"
                     />
                   </div>
                 </div>
-              </div>
 
-              <div className="pt-2">
-                <button
-                  type="submit"
-                  disabled={isSavingOnboard}
-                  className="w-full py-3 bg-brand-600 hover:bg-[#985e49] text-white font-semibold rounded-lg shadow-md transition-all duration-200 flex items-center justify-center cursor-pointer text-sm"
-                >
-                  {isSavingOnboard ? (
-                    <span className="flex items-center gap-2">
-                      <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                      Menyimpan Data Akad...
-                    </span>
-                  ) : (
-                    <>
-                      Simpan & Buka Dashboard ⚡
-                    </>
-                  )}
-                </button>
-              </div>
-            </form>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-1.5">
+                      Tanggal Akad
+                    </label>
+                    <input
+                      type="date"
+                      required
+                      value={onboardWeddingDate}
+                      onChange={(e) => setOnboardWeddingDate(e.target.value)}
+                      className="w-full px-4 py-3 bg-stone-50 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 font-mono text-sm text-stone-800 transition-all"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-1.5">
+                      Estimasi Total Anggaran
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-4 top-3 text-stone-400 text-sm font-semibold">Rp</span>
+                      <input
+                        type="text"
+                        required
+                        value={onboardTotalBudget === 0 ? "" : new Intl.NumberFormat('id-ID').format(onboardTotalBudget)}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/[^0-9]/g, "");
+                          setOnboardTotalBudget(val === "" ? 0 : Number(val));
+                        }}
+                        className="w-full pl-10 pr-4 py-3 bg-stone-50 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 font-mono text-sm text-stone-800 transition-all"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-6 flex flex-col md:flex-row gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setDismissedWelcome(true)}
+                    className="w-full md:w-auto px-6 py-3.5 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold rounded-xl transition-all duration-200 text-sm cursor-pointer"
+                  >
+                    Atur Nanti
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSavingOnboard}
+                    className="flex-1 py-3.5 bg-brand-600 hover:bg-[#985e49] text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center cursor-pointer text-sm"
+                  >
+                    {isSavingOnboard ? (
+                      <span className="flex items-center gap-2">
+                        <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                        Menyimpan...
+                      </span>
+                    ) : (
+                      "Simpan & Masuk Dasbor"
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
     </div>

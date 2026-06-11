@@ -13,8 +13,7 @@ import {
 } from "../lib/firebase";
 import { UserProfile } from "../types";
 
-// GANTI NOMOR INI DENGAN NOMOR WHATSAPP ANDA (Gunakan kode negara, e.g. 628...)
-const ADMIN_WHATSAPP_NUMBER = "6285713071197";
+// Whatsapp number removed for automated Midtrans gateway
 import { 
   Heart, 
   Coins, 
@@ -34,7 +33,7 @@ import {
   Loader2,
   Check
 } from "lucide-react";
-import { QRISCard } from "./QRISCard";
+import { PaymentGateway } from "./PaymentGateway";
 
 interface OnboardingProps {
   onSuccess: (profile: UserProfile) => void;
@@ -204,13 +203,11 @@ export default function Onboarding({ onSuccess, onLogout, profile, userId, setUs
     }
   };
 
-  const handleConfirmPaymentAndWhatsApp = async () => {
+  const handlePaymentSuccess = async () => {
     setIsLoading(true);
     setErrorMess("");
     
     const pUid = userId || (profile ? profile.uid : null);
-    const pEmail = email || (profile ? profile.email : "");
-    const pName = (profile && profile.fullName) || email.split("@")[0] || "Pengantin Baru";
     
     if (!pUid) {
       setErrorMess("ID pengguna tidak terdeteksi. Harap muat ulang halaman.");
@@ -219,29 +216,25 @@ export default function Onboarding({ onSuccess, onLogout, profile, userId, setUs
     }
     
     try {
-      // 1. Open WhatsApp window with pre-filled confirmation message
-      const text = encodeURIComponent(
-        `Assalamualaikum Admin Zawwaja,\n\n` +
-        `Saya telah melakukan pembayaran aktivasi premium Rp 25.000 via QRIS.\n\n` +
-        `Berikut rincian akun saya:\n` +
-        `- Nama: ${pName}\n` +
-        `- Email: ${pEmail}\n` +
-        `- UID: ${pUid}\n\n` +
-        `Mohon divalidasi pembayarannya. Terima kasih! 😊`
-      );
-      const waUrl = `https://api.whatsapp.com/send?phone=${ADMIN_WHATSAPP_NUMBER}&text=${text}`;
-      
-      // Open in a new tab
-      window.open(waUrl, "_blank");
-      
-      // 2. Set local storage flag to preserve pending view
+      // 1. Set Local Storage so we know they paid
       localStorage.setItem(`zawwaja_pending_activation_${pUid}`, "true");
       
-      // 3. Move to the pending waiting screen
-      setStep("pending");
+      // 2. Automatically mark as paid and approved!
+      await autoActivateUser(pUid);
+      
+      // 3. Forward to the application
+      if (profile) {
+        onSuccess({
+          ...profile,
+          paymentStatus: "paid",
+          approvalStatus: "approved"
+        });
+      } else {
+        window.location.reload();
+      }
     } catch (err: any) {
       console.error(err);
-      setErrorMess(err.message || "Gagal memproses konfirmasi pembayaran.");
+      setErrorMess(err.message || "Gagal memproses aktivasi otomatis.");
     } finally {
       setIsLoading(false);
     }
@@ -259,23 +252,23 @@ export default function Onboarding({ onSuccess, onLogout, profile, userId, setUs
           <div className="hidden lg:block"></div> {/* Spacer to push form to center vertically */}
 
           {/* Form Content Container */}
-          <div className="max-w-md w-full mx-auto my-auto py-8 glass-panel px-6 md:px-8 mt-8 md:mt-auto">
+          <div className="max-w-md w-full mx-auto my-auto py-6 md:py-8 glass-panel px-5 md:px-8 mt-2 md:mt-auto">
             
             {/* Majestic Centered Brand Emblem (No Text Clutter) */}
-            <div className="text-center mb-6 flex justify-center">
+            <div className="text-center mb-3 flex justify-center">
               <img 
                 src="/logo.webp" 
                 alt="Zawwaja Premium Emblem" 
-                className="w-24 h-24 object-contain filter drop-shadow-[0_4px_12px_rgba(175,118,97,0.15)] hover:scale-105 transition-all duration-300 cursor-pointer"
+                className="w-20 h-20 md:w-24 md:h-24 object-contain filter drop-shadow-[0_4px_12px_rgba(175,118,97,0.15)] hover:scale-105 transition-all duration-300 cursor-pointer"
                 width="96" height="96" fetchpriority="high" loading="eager"
               />
             </div>
 
             {isForgotPasswordMode ? (
               <div>
-                <div className="text-center mb-6 flex flex-col items-center">
-                  <Lock className="text-brand-600 mb-2.5 fill-brand-600/10 animate-pulse" size={36} />
-                  <h2 className="text-2xl font-serif font-bold text-text-primary leading-tight">
+                <div className="text-center mb-5 flex flex-col items-center">
+                  <Lock className="text-brand-600 mb-2 fill-brand-600/10 animate-pulse" size={32} />
+                  <h2 className="text-xl md:text-2xl font-serif font-bold text-text-primary leading-tight">
                     Lupa Kata Sandi?
                   </h2>
                   <p className="text-text-secondary text-xs mt-1.5 font-sans">
@@ -365,11 +358,11 @@ export default function Onboarding({ onSuccess, onLogout, profile, userId, setUs
               </div>
             ) : (
               <div>
-                <div className="text-center mb-6">
-                  <h2 className="text-2xl font-serif font-bold text-text-primary tracking-tight leading-tight">
+                <div className="text-center mb-5">
+                  <h2 className="text-xl md:text-2xl font-serif font-bold text-text-primary tracking-tight leading-tight">
                     {isSignUpMode ? "Mulai Pernikahan Barakah" : "Masuk ke Zawwaja"}
                   </h2>
-                  <p className="text-text-secondary text-xs mt-1 font-sans">
+                  <p className="text-text-secondary text-[11px] md:text-xs mt-1 font-sans">
                     {isSignUpMode 
                       ? "Susun rencana terbaik berlandaskan nilai syari'at" 
                       : "Lanjutkan perencanaan sakinah planner Anda"
@@ -595,22 +588,9 @@ export default function Onboarding({ onSuccess, onLogout, profile, userId, setUs
       <main className="flex-1 flex items-center justify-center px-4 py-12 relative z-10">
         <div className="w-full max-w-md glass-panel overflow-hidden">
           
-          {/* STEP 3: QRIS PAYMENT MODULE */}
+          {/* STEP 3: PAYMENT MODULE */}
           {step === "payment" && (
             <div className="p-8">
-              <div className="text-center mb-6">
-                <Coins className="mx-auto text-brand-600 mb-2" size={36} />
-                <h2 className="text-xl font-serif font-bold text-text-primary">Aktivasi Zawwaja</h2>
-                <p className="text-text-secondary text-sm mt-1">Satu kali investasi pendaftaran barakah selamanya</p>
-              </div>
-
-              {/* Price Tag box */}
-              <div className="mb-6 p-4 rounded-xl bg-white/40 border border-white/50 text-center backdrop-blur-sm">
-                <p className="text-xs uppercase font-semibold text-brand-800 tracking-wider">Pendaftaran Pernikahan Premium</p>
-                <h3 className="text-3xl font-bold font-mono text-brand-950 mt-1">Rp 25.000</h3>
-                <p className="text-[11px] text-brand-700 mt-1">Tanpa biaya bulanan tersembunyi</p>
-              </div>
-
               {errorMess && (
                 <div className="mb-4 p-3 bg-rose-50 border border-rose-200 rounded-lg text-rose-700 text-xs flex items-center gap-2">
                   <AlertCircle size={16} />
@@ -618,42 +598,16 @@ export default function Onboarding({ onSuccess, onLogout, profile, userId, setUs
                 </div>
               )}
 
-              {/* Custom QRIS Card with Download support */}
               <div className="mb-6">
-                <QRISCard />
+                <PaymentGateway
+                  userId={userId || (profile ? profile.uid : "")}
+                  userEmail={email || (profile ? profile.email : "")}
+                  userFullName={(profile && profile.fullName) ? profile.fullName : (email.split("@")[0] || "Pengguna")}
+                  onPaymentSuccess={handlePaymentSuccess}
+                />
               </div>
 
-              {/* Automated Grace Period info */}
-              <div className="bg-white/40 border border-white/50 rounded-xl p-4 mb-6 space-y-2 text-stone-700 backdrop-blur-sm">
-                <div className="flex gap-2.5">
-                  <span className="text-base">💡</span>
-                  <div className="text-xs leading-relaxed">
-                    <p className="font-bold mb-0.5">Sistem Aktivasi Instan (Terpercaya):</p>
-                    <p>Setelah scan QRIS dan transfer, klik tombol di bawah. Sistem akan **membuka dashboard Anda seketika** (tanpa menunggu), dan mengarahkan Anda untuk mengirim pesan konfirmasi ke WhatsApp Admin.</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Action Buttons */}
               <div className="space-y-3">
-                <button
-                  onClick={handleConfirmPaymentAndWhatsApp}
-                  disabled={isLoading}
-                  className="w-full py-3 bg-brand-600 hover:bg-brand-500 text-white font-bold rounded-lg shadow flex items-center justify-center transition-all cursor-pointer font-sans"
-                >
-                  {isLoading ? (
-                    <span className="flex items-center gap-2">
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      Mengaktifkan Akun...
-                    </span>
-                  ) : (
-                    <>
-                      <Wallet size={18} className="mr-2" />
-                      Konfirmasi Transfer & Masuk
-                    </>
-                  )}
-                </button>
-
                 <button
                   onClick={onLogout}
                   className="w-full py-2 border border-surface-border text-text-secondary hover:text-text-primary transition-colors text-xs font-semibold rounded-lg flex items-center justify-center cursor-pointer"
@@ -683,11 +637,11 @@ export default function Onboarding({ onSuccess, onLogout, profile, userId, setUs
                 </div>
                 <div className="flex gap-2">
                   <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-800 font-bold flex items-center justify-center shrink-0">2</span>
-                  <p>Notifikasi pembayaran QRIS otomatis terkirim langsung ke WhatsApp Admin.</p>
+                  <p>Sistem Payment Gateway (Midtrans) sedang memverifikasi transaksi Anda.</p>
                 </div>
                 <div className="flex gap-2">
                   <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-800 font-bold flex items-center justify-center shrink-0">3</span>
-                  <p>Setelah Admin memeriksa mutasi, akun Anda akan diaktifkan secara instan untuk membuka akses penuh planner pernikahan.</p>
+                  <p>Jika pembayaran telah tervalidasi oleh sistem, akun Anda akan aktif secara otomatis tanpa perlu menunggu persetujuan manual.</p>
                 </div>
               </div>
 

@@ -253,9 +253,9 @@ export default memo(function Sidebar({
             </button>
             
             <button 
-              onClick={onLogout}
-              className="w-8 h-8 rounded-full bg-brand-50/80 text-brand-600 flex items-center justify-center font-extrabold text-[10px] border border-brand-400/20 cursor-pointer shadow-sm hover:bg-rose-50/80 hover:border-rose-200 hover:text-rose-600 transition-all duration-200 uppercase"
-              title="Klik untuk Keluar (Logout)"
+              onClick={() => setIsCollapsed(false)}
+              className="w-8 h-8 rounded-full bg-brand-50/80 text-brand-600 flex items-center justify-center font-extrabold text-[10px] border border-brand-400/20 cursor-pointer shadow-sm hover:bg-white/40 hover:scale-105 active:scale-95 transition-all duration-200 uppercase"
+              title="Buka Sidebar"
             >
               {getInitials(profile?.fullName)}
             </button>

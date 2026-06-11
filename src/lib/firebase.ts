@@ -376,7 +376,7 @@ export async function registerUserProfile(
     window.dispatchEvent(new Event("mock-auth-changed"));
 
     // Trigger WhatsApp notification for new payments
-    triggerMockWhatsAppAlert(`Notifikasi Zawwaja: Calon Pengantin Baru ${fullName} mendaftar untuk tanggal akad ${weddingDate}. Menunggu verifikasi QRIS!`);
+    triggerMockWhatsAppAlert(`Notifikasi Zawwaja: Calon Pengantin Baru ${fullName} mendaftar untuk tanggal akad ${weddingDate}. Menunggu verifikasi pembayaran!`);
     
     return newProfile;
   } else {
@@ -393,7 +393,7 @@ export async function registerUserProfile(
   }
 }
 
-// Update payment status (QRIS)
+// Update payment status (Midtrans)
 export async function updatePaymentStatusToPaid(uid: string): Promise<void> {
   if (isMockMode) {
     const allProfilesStr = localStorage.getItem(MOCK_USERS_KEY) || "[]";
@@ -412,7 +412,7 @@ export async function updatePaymentStatusToPaid(uid: string): Promise<void> {
     // Admin message:
     const profile = updated.find(p => p.uid === uid);
     if (profile) {
-      triggerMockWhatsAppAlert(`WhatsApp Admin: ${profile.fullName} telah selesai membayar Rp 25.000 via QRIS. Harap lakukan verifikasi aktivasi akun di Dashboard Admin!`);
+      triggerMockWhatsAppAlert(`WhatsApp Admin: ${profile.fullName} telah selesai membayar Rp 25.000 via Midtrans. Akun telah aktif secara otomatis!`);
     }
   } else {
     try {
@@ -1110,7 +1110,7 @@ export async function uploadPaymentProof(userId: string, file: File): Promise<st
       return downloadURL;
     } catch (error: any) {
       console.error("Firebase Storage upload error:", error);
-      throw new Error(error.message || "Gagal mengunggah bukti transfer/pembayaran QRIS.");
+      throw new Error(error.message || "Gagal mengunggah bukti pembayaran.");
     }
   }
 }

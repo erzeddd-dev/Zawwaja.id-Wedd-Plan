@@ -80,8 +80,8 @@ export default function AdminPortal({ onApprovalChanged }: AdminPortalProps) {
             <ShieldCheck size={20} className="text-brand-300" />
             <span className="text-xs uppercase tracking-wider font-bold text-brand-200">Zawwaja Admin System</span>
           </div>
-          <h2 className="text-xl md:text-2xl font-serif font-bold">Portal Verifikasi QRIS Mudharabah</h2>
-          <p className="text-brand-100/90 text-xs">Menu asasi untuk memantau mutasi QRIS masuk sebesar Rp 25.000 dan mengaktifkan fungsionalitas akun pengantin seketika</p>
+          <h2 className="text-xl md:text-2xl font-serif font-bold">Portal Verifikasi Pembayaran</h2>
+          <p className="text-brand-100/90 text-xs">Menu asasi untuk memantau transaksi masuk sebesar Rp 25.000 dan mengaktifkan fungsionalitas akun pengantin seketika</p>
         </div>
 
         <button
@@ -118,7 +118,7 @@ export default function AdminPortal({ onApprovalChanged }: AdminPortalProps) {
           <div className="flex items-center justify-between border-b pb-3 border-surface-border">
             <div className="flex items-center gap-2">
               <Clock className="text-brand-600" size={18} />
-              <h3 className="font-bold text-text-primary text-sm font-serif">Menunggu Aktivasi (Sudah Bayar QRIS)</h3>
+              <h3 className="font-bold text-text-primary text-sm font-serif">Menunggu Aktivasi (Sudah Bayar)</h3>
             </div>
             <span className="bg-brand-100 text-brand-800 text-[10px] font-extrabold px-2 py-0.5 rounded-full">
               {pendingCouples.length} Antrian
@@ -127,7 +127,7 @@ export default function AdminPortal({ onApprovalChanged }: AdminPortalProps) {
 
           {pendingCouples.length === 0 ? (
             <div className="text-center text-text-tertiary py-12 text-xs">
-              Tidak ada antrian pengantin yang melampirkan bukti lunas QRIS Rp 25.000 baru saat ini.
+              Tidak ada antrian pengantin yang menunggu aktivasi manual.
             </div>
           ) : (
             <div className="divide-y divide-surface-border">
@@ -144,37 +144,9 @@ export default function AdminPortal({ onApprovalChanged }: AdminPortalProps) {
                     </span>
                   </div>
 
-                  {couple.paymentProofUrl && (
-                    <div className="border border-surface-border rounded-lg p-2 bg-surface-sunken flex items-center gap-3">
-                      <div className="w-10 h-10 rounded bg-surface-border border border-surface-border overflow-hidden shrink-0 flex items-center justify-center">
-                        {couple.paymentProofUrl.includes('.pdf') ? (
-                          <div className="w-full h-full flex items-center justify-center bg-rose-50 text-rose-800 text-[10px] font-bold">PDF</div>
-                        ) : (
-                          <img 
-                            src={couple.paymentProofUrl} 
-                            alt="Bukti Bayar" 
-                            className="w-full h-full object-cover"
-                            referrerPolicy="no-referrer"
-                          />
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[10px] font-bold text-text-secondary">Lampiran Bukti Bayar QRIS</p>
-                        <a 
-                          href={couple.paymentProofUrl} 
-                          target="_blank" 
-                          rel="noopener noreferrer" 
-                          className="text-[10px] text-brand-700 hover:underline font-bold flex items-center gap-0.5"
-                        >
-                          Buka di Tab Baru ↗
-                        </a>
-                      </div>
-                    </div>
-                  )}
-
                   <div className="bg-brand-50/50 p-2.5 rounded border border-brand-100 text-[10px] text-brand-900 font-sans leading-relaxed">
                     📝 <span className="font-bold">Panduan Verifikasi Admin:</span><br />
-                    Harap tinjau lampiran bukti transaksi QRIS pasangan {couple.fullName} di atas dengan teliti sebelum menekan tombol "Aktifkan Akun (Approve)" di bawah ini.
+                    Pasangan {couple.fullName} belum diaktifkan secara otomatis. Anda bisa mengaktifkan akun secara manual di bawah ini.
                   </div>
 
                   <div className="flex gap-2">
@@ -246,11 +218,11 @@ export default function AdminPortal({ onApprovalChanged }: AdminPortalProps) {
       {/* Module C: Registered in platform but unpaid */}
       <div className="bg-surface-raised border border-surface-border p-5 rounded-2xl shadow-sm space-y-3">
         <h3 className="font-serif font-bold text-text-primary text-sm border-b pb-2.5 border-surface-border">
-          User Terdaftar - Belum Menuntaskan Pembayaran QRIS (Membuka QRIS Screen)
+          User Terdaftar - Belum Menuntaskan Pembayaran
         </h3>
         
         {unpaidCouples.length === 0 ? (
-          <p className="text-xs text-text-tertiary py-3 text-center">Seluruh pendaftar di platform telah menuntaskan kewajiban iuran QRIS.</p>
+          <p className="text-xs text-text-tertiary py-3 text-center">Seluruh pendaftar di platform telah menuntaskan kewajiban pembayaran.</p>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
             {unpaidCouples.map(couple => (
@@ -260,7 +232,7 @@ export default function AdminPortal({ onApprovalChanged }: AdminPortalProps) {
                   <p className="text-[10px] text-text-tertiary">{couple.email}</p>
                 </div>
                 <div className="flex items-center gap-1.5 shrink-0">
-                  <span className="text-[9px] bg-stone-100 border text-text-secondary px-1.5 py-0.5 rounded font-mono">Pending QRIS</span>
+                  <span className="text-[9px] bg-stone-100 border text-text-secondary px-1.5 py-0.5 rounded font-mono">Pending Payment</span>
                   <button
                     onClick={() => handleApprove(couple.uid, couple.fullName || "Pengantin Baru")}
                     className="px-2 py-0.5 bg-amber-600 hover:bg-amber-700 text-white rounded font-bold text-[9px] transition-all cursor-pointer"
