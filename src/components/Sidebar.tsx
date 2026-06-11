@@ -51,7 +51,7 @@ export default memo(function Sidebar({
     <>
       {/* 1. MOBILE VIEW: Bottom Navigation Bar (md:hidden) — Glassmorphism */}
       {/* Order: Mahar | Vendor | Persiapan | Dashboard (rightmost) */}
-      <div className="fixed bottom-0 left-0 right-0 h-16 glass-bottom-bar flex md:hidden items-center justify-around px-2 z-40">
+      <div className="fixed bottom-0 left-0 right-0 h-[52px] glass-bottom-bar flex md:hidden items-center justify-around px-2 z-40">
         {[...menuItems].reverse().map((item) => {
           const Icon = item.icon;
           const isActive = currentTab === item.id;
@@ -66,20 +66,20 @@ export default memo(function Sidebar({
             <button
               key={item.id}
               onClick={() => setCurrentTab(item.id)}
-              className={`flex flex-col items-center justify-center py-1 flex-1 transition-all cursor-pointer relative ${
+              className={`flex flex-col items-center justify-center h-full flex-1 transition-all cursor-pointer ${
                 isActive 
                   ? "text-brand-600" 
-                  : "text-text-secondary hover:text-brand-600"
+                  : "text-text-tertiary hover:text-brand-600"
               }`}
               title={item.label}
               id={`nav-item-mobile-${item.id}`}
             >
-              {/* Active indicator dot — top */}
-              <span className={`absolute top-0 left-1/2 -translate-x-1/2 w-5 h-0.5 rounded-full transition-all duration-300 ${
-                isActive ? 'bg-brand-600 opacity-100' : 'opacity-0'
-              }`} />
-              <Icon size={isActive ? 20 : 18} className={`mb-0.5 transition-all ${isActive ? 'scale-110' : ''}`} />
-              <span className={`text-[9px] font-sans tracking-tight transition-all ${isActive ? "text-brand-600 font-bold" : "text-text-tertiary font-medium"}`}>
+              <Icon 
+                size={24} 
+                strokeWidth={isActive ? 2.5 : 2} 
+                className={`transition-transform duration-200 ${isActive ? 'scale-105' : ''}`} 
+              />
+              <span className={`text-[10px] font-sans tracking-tight leading-none mt-1 transition-all ${isActive ? "text-brand-600 font-bold" : "text-text-tertiary font-medium"}`}>
                 {shortLabel}
               </span>
             </button>
@@ -90,19 +90,20 @@ export default memo(function Sidebar({
         {isAdmin && (
           <button
             onClick={() => setCurrentTab("admin")}
-            className={`flex flex-col items-center justify-center py-1 flex-1 transition-all cursor-pointer relative ${
+            className={`flex flex-col items-center justify-center h-full flex-1 transition-all cursor-pointer ${
               currentTab === "admin" 
                 ? "text-amber-700" 
-                : "text-stone-550 hover:text-amber-700"
+                : "text-stone-400 hover:text-amber-700"
             }`}
             title="Portal Admin"
             id="nav-item-mobile-admin"
           >
-            <span className={`absolute top-0 left-1/2 -translate-x-1/2 w-5 h-0.5 rounded-full transition-all duration-300 ${
-              currentTab === "admin" ? 'bg-amber-600 opacity-100' : 'opacity-0'
-            }`} />
-            <UserCheck size={currentTab === "admin" ? 20 : 18} className="mb-0.5 transition-all" />
-            <span className={`text-[9px] font-sans tracking-tight ${currentTab === "admin" ? "text-amber-700 font-bold" : "text-stone-400 font-medium"}`}>
+            <UserCheck 
+              size={24} 
+              strokeWidth={currentTab === "admin" ? 2.5 : 2} 
+              className={`transition-transform duration-200 ${currentTab === "admin" ? 'scale-105' : ''}`} 
+            />
+            <span className={`text-[10px] font-sans tracking-tight leading-none mt-1 ${currentTab === "admin" ? "text-amber-700 font-bold" : "text-stone-400 font-medium"}`}>
               Admin
             </span>
           </button>

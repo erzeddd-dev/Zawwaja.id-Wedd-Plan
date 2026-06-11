@@ -499,7 +499,7 @@ export default function App() {
                 </div>
 
                 <div className="bg-surface-raised p-6 rounded-2xl border border-surface-border shadow-sm">
-                  <h3 className="font-serif font-bold text-sm text-text-primary mb-4 border-b border-surface-border pb-2">Ubah Rencana Akad</h3>
+                  <h3 className="font-sans font-bold text-sm text-text-primary mb-4 border-b border-surface-border pb-2">Ubah Rencana Akad</h3>
                   <form onSubmit={handleUpdateSettings} className="space-y-4 text-xs">
                     <div>
                       <label className="block text-[10px] font-bold uppercase text-text-tertiary mb-1">Calon Pengantin Pria</label>

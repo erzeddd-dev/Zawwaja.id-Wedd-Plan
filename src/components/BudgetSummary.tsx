@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { UserProfile, WeddingChecklistItem, MaharItem } from "../types";
-import { 
-  Calendar, 
+import {
+  Calendar,
   Sparkles,
   AlertCircle,
   Syringe,
@@ -86,11 +86,11 @@ const phases = [
   }
 ];
 
-function BudgetSummary({ 
-  profile, 
-  checklistItems, 
-  maharItems, 
-  onNavigate, 
+function BudgetSummary({
+  profile,
+  checklistItems,
+  maharItems,
+  onNavigate,
   onSaveProfile,
   onSaveChecklistItem,
   onOpenSettings
@@ -168,10 +168,10 @@ function BudgetSummary({
   // Dynamic ranges logic based on profile registration date and wedding date
   const weddingDateObj = profile.weddingDate ? new Date(profile.weddingDate) : null;
   const creationDateObj = profile.createdAt ? new Date(profile.createdAt) : new Date();
-  const totalPrepDays = weddingDateObj 
+  const totalPrepDays = weddingDateObj
     ? Math.max(180, Math.floor((weddingDateObj.getTime() - creationDateObj.getTime()) / (1000 * 60 * 60 * 24)))
     : 180;
-  
+
   const segmentLength = totalPrepDays / 6;
   const daysElapsed = Math.max(0, totalPrepDays - daysRemaining);
   const activePhaseId = Math.min(6, Math.max(1, Math.floor(daysElapsed / segmentLength) + 1));
@@ -184,7 +184,7 @@ function BudgetSummary({
     "Cek kembali syarat KUA jauh-jauh hari agar tidak ada dokumen yang kurang saat hari pendaftaran."
   ];
   const [activeTip, setActiveTip] = useState(0);
-  
+
   useEffect(() => {
     const today = new Date();
     const dayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / 1000 / 60 / 60 / 24);
@@ -271,7 +271,7 @@ function BudgetSummary({
     const items = getItemsForPhase(phase.id);
     return items.reduce((acc, i) => acc + (i.budgetActual || 0), 0);
   }), [phases, getItemsForPhase]);
-  
+
   const maxChartVal = useMemo(() => Math.max(...chartPoints, 1), [chartPoints]);
 
   // Generate SVG path for budget chart
@@ -280,13 +280,13 @@ function BudgetSummary({
   const chartPadding = 20;
   const chartInnerWidth = chartWidth - chartPadding * 2;
   const chartInnerHeight = chartHeight - chartPadding;
-  
+
   const chartPathPoints = useMemo(() => chartPoints.map((val, i) => {
     const x = chartPadding + (i / (chartPoints.length - 1)) * chartInnerWidth;
     const y = chartHeight - chartPadding / 2 - (val / maxChartVal) * chartInnerHeight;
     return { x, y };
   }), [chartPoints, maxChartVal, chartInnerWidth, chartInnerHeight]);
-  
+
   const chartPathD = useMemo(() => chartPathPoints.reduce((acc, point, i) => {
     if (i === 0) return `M ${point.x} ${point.y}`;
     const prev = chartPathPoints[i - 1];
@@ -302,7 +302,7 @@ function BudgetSummary({
     const radius = (size - strokeWidth) / 2;
     const circumference = 2 * Math.PI * radius;
     const offset = circumference - (percent / 100) * circumference;
-    
+
     return (
       <svg width={size} height={size} className="transform -rotate-90">
         <circle
@@ -339,91 +339,91 @@ function BudgetSummary({
       <div className="animate-fade-up">
         {/* Mobile: Golden Ratio 38:62 profile dashboard */}
         <div className="md:hidden flex flex-col relative" style={{ padding: '0 34px' }}>
-          
-          {/* ─── ZONE 1: Context & Status (Top ~38% / 306px) ─── */}
-          <div className="w-full" style={{ paddingBottom: '21px' }}>
-            {/* Avatar + Name Row — 8px icon-text gap, 13px name-date gap */}
-            <div className="flex items-center gap-[13px]" style={{ marginBottom: '21px' }}>
-              <div className="relative shrink-0">
-                <div className="w-[72px] h-[72px] rounded-full bg-gradient-to-br from-brand-100 via-brand-50 to-brand-200 text-brand-700 flex items-center justify-center font-bold text-[23px] font-sans border-[3px] border-white shadow-lg shadow-brand-600/10">
-                  {getInitials(profile.fullName)}
+
+          {/* ─── ZONE 1: Context & Status ─── */}
+          <div className="w-full pb-2">
+            {/* Name Row — Centered Layout */}
+            <div className="flex flex-col mb-4 items-center justify-center">
+              <div className="flex items-center gap-3 relative">
+                <div className="flex flex-col items-center justify-center text-center">
+                  <h1 className="text-[28px] font-serif font-bold text-text-primary leading-none tracking-tight">
+                    {profile.fullName || "Pengantin"}
+                  </h1>
+                  <span className="text-[20px] font-serif text-brand-500 italic leading-none my-1.5">
+                    &
+                  </span>
+                  <h1 className="text-[28px] font-serif font-bold text-text-primary leading-none tracking-tight">
+                    {profile.partnerName || "Pasangan"}
+                  </h1>
                 </div>
-                {/* Edit button — positioned ON the circle border */}
+
+                {/* Edit button */}
                 <button
                   onClick={onOpenSettings}
-                  className="absolute bottom-0 right-[-4px] w-[28px] h-[28px] rounded-full bg-brand-600 text-white flex items-center justify-center shadow-md border-2 border-white hover:bg-brand-700 transition-colors cursor-pointer active:scale-90"
+                  className="absolute -right-8 top-1/2 -translate-y-1/2 p-1.5 text-stone-400 hover:text-brand-600 hover:bg-brand-50 rounded-full transition-colors cursor-pointer"
                   title="Edit Profil"
                   id="profile-edit-btn"
                 >
-                  <Pencil size={12} />
+                  <Pencil size={18} />
                 </button>
-              </div>
-              <div className="text-left min-w-0">
-                {/* 23px — Golden Ratio sub-heading, sans-serif unified */}
-                <h1 className="text-[23px] font-sans font-bold text-text-primary leading-tight tracking-tight truncate">
-                  {profile.fullName || "Pengantin"}
-                </h1>
-                {/* 14px — body text */}
-                <p className="text-[14px] text-text-secondary font-sans" style={{ marginTop: '4px' }}>
-                  & {profile.partnerName || "Pasangan"}
-                </p>
-                {/* 10px — micro label */}
-                <p className="text-[10px] text-text-tertiary font-medium" style={{ marginTop: '4px' }}>
-                  {profile.weddingDate 
-                    ? new Date(profile.weddingDate).toLocaleDateString("id-ID", { day: 'numeric', month: 'long', year: 'numeric' })
-                    : "Tanggal belum ditentukan"}
-                </p>
               </div>
             </div>
 
-            {/* 3 Big Stats Row — 37px super-heading numbers, 10px labels */}
-            <div className="flex items-stretch justify-center bg-white rounded-2xl" style={{ border: '1px solid rgba(0,0,0,0.06)', boxShadow: '0 1px 8px rgba(0,0,0,0.05)' }}>
-              {/* Stat: Countdown */}
-              <div className="flex-1 flex flex-col items-center" style={{ padding: '13px 0' }}>
-                <span className="text-[37px] font-sans font-extrabold text-brand-600 leading-none tracking-tight">
+            {/* 3 Big Stats Row — Golden Ratio Asymmetric Grid (62% - 38%) */}
+            <div className="flex items-stretch bg-white rounded-2xl overflow-hidden" style={{ border: '1px solid rgba(0,0,0,0.06)', boxShadow: '0 1px 8px rgba(0,0,0,0.05)' }}>
+              {/* Main Stat (62% width): Countdown */}
+              <div className="flex-[6.18] flex flex-col items-center justify-center border-r border-black/5 py-2 relative">
+                <span className="text-[32px] font-sans font-extrabold text-brand-600 leading-none tracking-tight">
                   {daysRemaining}
                 </span>
-                <span className="text-[10px] text-text-secondary font-semibold uppercase tracking-wider" style={{ marginTop: '8px' }}>Hari Lagi</span>
-              </div>
-              <div className="w-px bg-black/5" />
-              {/* Stat: Budget Used — with Rp prefix to avoid ambiguity */}
-              <div className="flex-1 flex flex-col items-center" style={{ padding: '13px 0' }}>
-                <span className={`text-[32px] font-sans font-extrabold leading-none tracking-tight ${isBudgetSafe ? 'text-text-primary' : 'text-rose-600'}`}>
-                  <span className="text-[18px]">Rp</span>
-                  {totalActualSpent >= 1000000 
-                    ? `${(totalActualSpent / 1000000).toFixed(1)}jt`
-                    : totalActualSpent >= 1000 
-                      ? `${(totalActualSpent / 1000).toFixed(0)}rb`
-                      : totalActualSpent
-                  }
+                <span className="text-[9px] text-text-secondary font-bold uppercase tracking-wider mt-0.5">Hari Lagi</span>
+
+                {/* Wedding Date moved inside the countdown block */}
+                <span className="text-[8px] text-text-tertiary font-medium mt-1">
+                  {profile.weddingDate
+                    ? new Date(profile.weddingDate).toLocaleDateString("id-ID", { day: 'numeric', month: 'short', year: 'numeric' })
+                    : "Tanggal belum ditentukan"}
                 </span>
-                <span className="text-[10px] text-text-secondary font-semibold uppercase tracking-wider" style={{ marginTop: '8px' }}>Terpakai</span>
               </div>
-              <div className="w-px bg-black/5" />
-              {/* Stat: Progress % */}
-              <div className="flex-1 flex flex-col items-center" style={{ padding: '13px 0' }}>
-                <span className="text-[37px] font-sans font-extrabold text-brand-600 leading-none tracking-tight">
-                  {checklistPercentage}<span className="text-[18px]">%</span>
-                </span>
-                <span className="text-[10px] text-text-secondary font-semibold uppercase tracking-wider" style={{ marginTop: '8px' }}>Selesai</span>
+
+              {/* Secondary Stats Stacked (38% width) */}
+              <div className="flex-[3.82] flex flex-col">
+                {/* Stat: Budget Used */}
+                <div className="flex-1 flex flex-col items-center justify-center border-b border-black/5 py-1">
+                  <span className={`text-[14px] font-sans font-extrabold leading-none tracking-tight ${isBudgetSafe ? 'text-text-primary' : 'text-rose-600'}`}>
+                    <span className="text-[9px] mr-0.5">Rp</span>
+                    {totalActualSpent >= 1000000
+                      ? `${(totalActualSpent / 1000000).toFixed(1)}jt`
+                      : totalActualSpent >= 1000
+                        ? `${(totalActualSpent / 1000).toFixed(0)}rb`
+                        : totalActualSpent
+                    }
+                  </span>
+                  <span className="text-[7px] text-text-secondary font-semibold uppercase tracking-wider" style={{ marginTop: '2px' }}>Terpakai</span>
+                </div>
+                {/* Stat: Progress % */}
+                <div className="flex-1 flex flex-col items-center justify-center py-1">
+                  <span className="text-[14px] font-sans font-extrabold text-brand-600 leading-none tracking-tight">
+                    {checklistPercentage}<span className="text-[9px] ml-0.5">%</span>
+                  </span>
+                  <span className="text-[7px] text-text-secondary font-semibold uppercase tracking-wider" style={{ marginTop: '2px' }}>Selesai</span>
+                </div>
               </div>
             </div>
           </div>
 
           {/* ─── ZONE 2: Control Center ─── */}
           {/* Quick actions with verbs — Law of Similarity: same function = same style */}
-          <div className="w-full flex gap-[8px]" style={{ paddingBottom: '13px' }}>
+          <div className="w-full flex gap-2">
             <button
               onClick={() => onNavigate("vendors")}
-              className="flex-1 bg-white border border-black/8 text-text-primary font-semibold text-[12px] font-sans rounded-xl flex items-center justify-center gap-[8px] active:scale-95 transition-transform cursor-pointer"
-              style={{ padding: '13px 0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}
+              className="flex-1 bg-white border border-black/8 text-text-primary font-semibold text-[11px] font-sans rounded-xl flex items-center justify-center gap-1.5 active:scale-95 transition-transform cursor-pointer py-2 shadow-sm"
             >
               <Building size={14} /> Kelola Vendor
             </button>
             <button
               onClick={() => onNavigate("mahar")}
-              className="flex-1 bg-white border border-black/8 text-text-primary font-semibold text-[12px] font-sans rounded-xl flex items-center justify-center gap-[8px] active:scale-95 transition-transform cursor-pointer"
-              style={{ padding: '13px 0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}
+              className="flex-1 bg-white border border-black/8 text-text-primary font-semibold text-[11px] font-sans rounded-xl flex items-center justify-center gap-1.5 active:scale-95 transition-transform cursor-pointer py-2 shadow-sm"
             >
               <Gift size={14} /> Atur Mahar
             </button>
@@ -448,27 +448,27 @@ function BudgetSummary({
       </div>
 
       {/* ============================================ */}
-      {/* ZONE 3: Deep Dive Content (Bottom ~62%)    */}
+      {/* ZONE 3: Deep Dive Content (Bottom ~70%)    */}
       {/* ============================================ */}
-      {/* 55px Fibonacci macro gap from Zone 2 to content */}
-      <div className="glass-panel animate-fade-up relative" style={{ animationDelay: '0.1s', marginTop: '0' }}>
-        <div className="flex items-center justify-between" style={{ padding: '13px 21px 8px' }}>
-          <h2 className="text-[10px] font-bold font-sans uppercase tracking-[0.2em] text-text-secondary">
+      <div className="glass-panel animate-fade-up relative !mt-0 md:!mt-6" style={{ animationDelay: '0.1s' }}>
+        <div className="flex items-center justify-between" style={{ padding: '16px 21px 8px' }}>
+          <h2 className="text-[11px] font-bold font-sans uppercase tracking-[0.2em] text-text-secondary">
             Timeline Persiapan Nikah
           </h2>
-          {/* Fase button lives HERE — inside its own card (Law of Similarity) */}
+          {/* Fase button Golden Ratio padding */}
           <button
             onClick={() => onNavigate("checklist")}
-            className="text-[10px] text-white font-bold bg-brand-600 px-3 py-1 rounded-full cursor-pointer active:scale-95 transition-transform"
+            className="text-[10px] text-white font-bold bg-brand-600 rounded-full cursor-pointer active:scale-95 transition-transform"
+            style={{ padding: '8px 13px' }}
           >
             Fase {activePhaseId}/6 →
           </button>
         </div>
 
-        {/* Mobile: Vertical Timeline */}
+        {/* Mobile: Vertical Timeline (Compact) */}
         <div className="md:hidden px-4 py-4 relative">
           {/* Vertical Connector Line (Background) */}
-          <div className="absolute left-[42px] top-8 bottom-8 w-1 rounded-full" style={{ background: 'rgba(0,0,0,0.06)' }}>
+          <div className="absolute left-[33px] top-8 bottom-8 w-1 rounded-full" style={{ background: 'rgba(0,0,0,0.06)' }}>
             <div
               className="w-full rounded-full transition-all duration-700"
               style={{
@@ -490,8 +490,8 @@ function BudgetSummary({
                   <button
                     onClick={() => onNavigate(phase.navigateTo)}
                     style={{
-                      width: '52px',
-                      height: '52px',
+                      width: '34px',
+                      height: '34px',
                       borderRadius: '50%',
                       display: 'flex',
                       alignItems: 'center',
@@ -503,46 +503,45 @@ function BudgetSummary({
                       ...(isActive ? {
                         // ACTIVE state: bright glowing brand fill
                         background: 'linear-gradient(145deg, rgba(255,255,255,0.95) 0%, rgba(210,240,230,0.85) 100%)',
-                        border: '2.5px solid rgba(42,92,77,0.7)',
-                        boxShadow: '0 0 0 4px rgba(42,92,77,0.15), 0 0 20px rgba(42,92,77,0.4), 0 4px 16px rgba(0,0,0,0.08), inset 0 2px 3px rgba(255,255,255,0.9)'
+                        border: '2px solid rgba(42,92,77,0.7)',
+                        boxShadow: '0 0 0 3px rgba(42,92,77,0.15), 0 0 12px rgba(42,92,77,0.4), 0 2px 8px rgba(0,0,0,0.08), inset 0 1px 2px rgba(255,255,255,0.9)'
                       } : {
                         // NORMAL state: muted grey glass
                         background: 'linear-gradient(145deg, rgba(240,240,240,0.7) 0%, rgba(220,225,223,0.6) 100%)',
-                        border: '1.5px solid rgba(200,210,207,0.6)',
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.04), inset 0 1px 2px rgba(255,255,255,0.5)'
+                        border: '1px solid rgba(200,210,207,0.6)',
+                        boxShadow: '0 1px 4px rgba(0,0,0,0.04), inset 0 1px 2px rgba(255,255,255,0.5)'
                       })
                     }}
                     id={`timeline-node-mobile-${phase.id}`}
                     aria-label={phase.title}
                   >
-                    <Icon size={20} className={isActive ? 'text-brand-600' : 'text-stone-500'} />
+                    <Icon size={16} className={isActive ? 'text-brand-600' : 'text-stone-500'} />
                   </button>
 
                   {/* Info / Text area */}
-                  <div className="flex-1 min-w-0 py-1">
-                    <div className="flex items-center gap-2 mb-0.5">
-                      <p className={`text-[13px] font-bold font-sans leading-tight truncate ${
-                        isActive ? 'text-brand-600' : 'text-stone-600'
-                      }`}>
-                        {phase.title}
+                  <div className="flex-1 min-w-0 py-1 flex flex-col justify-center">
+                    {isActive ? (
+                      <>
+                        <div className="flex items-center gap-2 mb-1">
+                          <p className="text-[16px] font-bold font-sans leading-tight truncate text-brand-600">
+                            {phase.title}
+                          </p>
+                          <span className="text-[7px] font-black text-brand-600 uppercase tracking-wider bg-brand-50 px-1.5 py-0.5 rounded-full border border-brand-100 shrink-0 animate-pulse">
+                            Aktif
+                          </span>
+                        </div>
+                        <p className="text-[12px] text-stone-500 leading-tight line-clamp-1 mb-1">
+                          {phase.subtitle}
+                        </p>
+                        <div className="flex items-center gap-1.5 mt-1.5">
+                          <ProgressRing percent={progress} size={16} strokeWidth={2} />
+                          <span className="text-[9px] font-bold text-brand-600">{progress}% selesai</span>
+                        </div>
+                      </>
+                    ) : (
+                      <p className="text-[13px] font-medium font-sans leading-tight truncate text-stone-500">
+                        {phase.title} <span className="text-[10px] ml-1 opacity-70">({phase.subtitle})</span>
                       </p>
-                      {isActive && (
-                        <span className="text-[7px] font-black text-brand-600 uppercase tracking-wider bg-brand-50 px-1.5 py-0.5 rounded-full border border-brand-100 shrink-0 animate-pulse">
-                          Aktif
-                        </span>
-                      )}
-                    </div>
-                    
-                    <p className="text-[10px] text-stone-500 leading-tight line-clamp-1 mb-1">
-                      {phase.subtitle}
-                    </p>
-
-                    {/* Progress indicator specifically for active phase */}
-                    {isActive && (
-                      <div className="flex items-center gap-1.5 mt-1.5">
-                        <ProgressRing percent={progress} size={16} strokeWidth={2} />
-                        <span className="text-[9px] font-bold text-brand-600">{progress}% selesai</span>
-                      </div>
                     )}
                   </div>
                 </div>
@@ -590,15 +589,13 @@ function BudgetSummary({
                 >
                   <button
                     onClick={() => onNavigate(phase.navigateTo)}
-                    className={`glass-node w-16 h-16 flex items-center justify-center relative z-10 ${
-                      isActive ? 'glass-node-active' : ''
-                    }`}
+                    className={`glass-node w-16 h-16 flex items-center justify-center relative z-10 ${isActive ? 'glass-node-active' : ''
+                      }`}
                     id={`timeline-node-${phase.id}`}
                     aria-label={phase.title}
                   >
-                    <Icon size={24} className={`${
-                      isActive ? 'text-brand-600' : 'text-text-tertiary'
-                    }`} />
+                    <Icon size={24} className={`${isActive ? 'text-brand-600' : 'text-text-tertiary'
+                      }`} />
                   </button>
 
                   {isActive && (
@@ -713,14 +710,14 @@ function BudgetSummary({
                 strokeDasharray="4 4"
               />
             ))}
-            
+
             {/* Area fill under the line */}
             <path
               d={chartAreaD}
               fill="url(#chartGradient)"
               opacity="0.4"
             />
-            
+
             {/* The line itself */}
             <path
               d={chartPathD}
@@ -730,7 +727,7 @@ function BudgetSummary({
               strokeLinecap="round"
               style={{ filter: 'drop-shadow(0 1px 3px rgba(42, 92, 77, 0.2))' }}
             />
-            
+
             {/* Data points */}
             {chartPathPoints.map((point, i) => (
               <g key={i}>
@@ -757,7 +754,7 @@ function BudgetSummary({
                 </text>
               </g>
             ))}
-            
+
             {/* Gradient definition */}
             <defs>
               <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
@@ -821,7 +818,7 @@ function BudgetSummary({
                 <Syringe size={18} />
                 <h3 className="font-serif font-bold text-sm">Panduan & Jadwal Vaksinasi Pranikah Syar'i</h3>
               </div>
-              <button 
+              <button
                 onClick={() => setShowVaccineModal(false)}
                 className="p-1 hover:bg-surface-raised/10 rounded text-rose-100 hover:text-white transition-colors cursor-pointer border-none bg-transparent"
               >
@@ -833,7 +830,7 @@ function BudgetSummary({
               <p className="leading-relaxed text-text-secondary font-medium">
                 Pemberian imunisasi dan vaksinasi pramilu/pranikah merupakan bagian dari ikhtiar menjaga kesehatan jasmani keturunan (Hifzhun Nasl) yang dianjurkan dalam Islam.
               </p>
-              
+
               <div className="space-y-3.5 divide-y divide-stone-100">
                 <div className="pt-0">
                   <h4 className="font-bold text-brand-600 text-xs flex items-center gap-1.5">
@@ -900,7 +897,7 @@ function BudgetSummary({
                 <Info size={18} />
                 <h3 className="font-serif font-bold text-sm">Panduan & Syarat Pendaftaran KUA</h3>
               </div>
-              <button 
+              <button
                 onClick={() => setShowKuaModal(false)}
                 className="p-1 hover:bg-surface-raised/10 rounded text-rose-100 hover:text-white transition-colors cursor-pointer border-none bg-transparent"
               >
@@ -910,7 +907,7 @@ function BudgetSummary({
 
             <div className="p-6 space-y-4 text-xs overflow-y-auto text-text-secondary">
               <h4 className="font-serif font-bold text-text-primary text-sm">Alur Administrasi Pendaftaran Nikah Resmi</h4>
-              
+
               <div className="space-y-4">
                 <div className="bg-surface-sunken p-3 rounded-xl border border-surface-border space-y-1.5">
                   <span className="font-bold text-brand-600 uppercase tracking-wider text-[9px] block">Langkah 1: Pengantar RT/RW & Kelurahan (N1-N4)</span>
@@ -1038,16 +1035,16 @@ function BudgetSummary({
                   </label>
                   <div className="relative">
                     <span className="absolute left-3 top-2.5 text-text-secondary text-sm font-semibold">Rp</span>
-                      <input
-                        type="text"
-                        required
-                        value={onboardTotalBudget === 0 ? "" : new Intl.NumberFormat('id-ID').format(onboardTotalBudget)}
-                        onChange={(e) => {
-                          const val = e.target.value.replace(/[^0-9]/g, "");
-                          setOnboardTotalBudget(val === "" ? 0 : Number(val));
-                        }}
-                        className="w-full pl-9 pr-3 py-2.5 bg-surface-sunken rounded-lg border border-surface-border focus:outline-none focus:ring-2 focus:ring-brand-600 font-mono text-xs text-text-primary"
-                      />
+                    <input
+                      type="text"
+                      required
+                      value={onboardTotalBudget === 0 ? "" : new Intl.NumberFormat('id-ID').format(onboardTotalBudget)}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/[^0-9]/g, "");
+                        setOnboardTotalBudget(val === "" ? 0 : Number(val));
+                      }}
+                      className="w-full pl-9 pr-3 py-2.5 bg-surface-sunken rounded-lg border border-surface-border focus:outline-none focus:ring-2 focus:ring-brand-600 font-mono text-xs text-text-primary"
+                    />
                   </div>
                 </div>
               </div>
